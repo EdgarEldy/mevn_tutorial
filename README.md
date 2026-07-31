@@ -462,10 +462,10 @@ Old express-generator scaffold: root `app.js`, `bin/`, `routes/`, `public/`, roo
 
 ### Checklist
 
-- [ ] `yarn install` succeeds
-- [ ] `yarn dev` starts without error
-- [ ] `GET http://localhost:3001` returns a response
-- [ ] `yarn test:unit` passes
+- [x] `yarn install` succeeds
+- [x] `yarn dev` starts without error
+- [x] `GET http://localhost:3001` returns a response
+- [x] `yarn test:unit` passes (4 suites, 17 tests)
 
 ---
 
