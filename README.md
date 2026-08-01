@@ -637,14 +637,14 @@ body. View "sent" mail in dev at MailHog's UI, `http://localhost:8025`.
 
 ### Checklist
 
-- [ ] `POST /register` sends an activation email (verified via MailHog's HTTP API in the integration test) and returns the safe user (no token, no password)
-- [ ] `GET /activate/:token` sets `enabled = true` on the user
-- [ ] `POST /login` on inactive account returns `403`; on success returns `user.roles` populated
-- [ ] `POST /logout` + subsequent request with same token returns `401`
-- [ ] `POST /forgot-password` sends a reset email only when the account exists, but returns the byte-identical response either way (own integration test asserting this explicitly)
-- [ ] `POST /reset-password` with expired token returns `400`
-- [ ] A non-admin authenticated user gets `403` on POST/PUT/DELETE for categories/products/customers/orders (REST) and the GraphQL order mutations; an admin succeeds
-- [ ] Unit tests (`tests/unit/auth.service.test.js`) and integration tests (`tests/integration/auth.test.js`, including real MailHog verification and the RBAC checks above) pass from this branch's first PR, not bolted on afterward
+- [x] `POST /register` sends an activation email (verified via MailHog's HTTP API in the integration test) and returns the safe user (no token, no password)
+- [x] `GET /activate/:token` sets `enabled = true` on the user
+- [x] `POST /login` on inactive account returns `403`; on success returns `user.roles` populated
+- [x] `POST /logout` + subsequent request with same token returns `401`
+- [x] `POST /forgot-password` sends a reset email only when the account exists, but returns the byte-identical response either way (own integration test asserting this explicitly)
+- [x] `POST /reset-password` with expired token returns `400`
+- [x] A non-admin authenticated user gets `403` on POST/PUT/DELETE for categories/products/customers/orders (REST) and the GraphQL order mutations; an admin succeeds
+- [x] Unit tests (`tests/unit/auth.service.test.js`, plus `auth.middleware.test.js`/`authorize.middleware.test.js`) and integration tests (`tests/integration/auth.test.js`, including real MailHog verification, plus RBAC checks retrofitted into every other module's integration tests) pass from this branch's first PR, not bolted on afterward — 12 unit suites / 85 tests, 6 integration suites / 88 tests
 
 ---
 
