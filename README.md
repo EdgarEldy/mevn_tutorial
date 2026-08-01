@@ -61,20 +61,20 @@ Repository: https://github.com/EdgarEldy/mevn_tutorial
 
 | Component | Choice | Version |
 |---|---|---|
-| Framework | Vue | ^3.4.x (Composition API, `<script setup>`) |
-| Build tool | Vite | ^5.x (already scaffolded) |
-| Routing | Vue Router | ^4.x (already scaffolded) |
-| State | Pinia | ^2.x (already scaffolded) |
-| UI | Vuetify 3 (Material Design) | ^3.x — to add |
-| HTTP client | axios | ^1.x — to add |
-| Form validation | VeeValidate + yup | ^4.x / ^1.x — to add |
-| Notifications | vue-toastification | ^2.x — to add |
-| PDF export | jsPDF + jspdf-autotable | ^4.x / ^5.x — to add |
-| Unit tests | Vitest + @vue/test-utils | already scaffolded |
-| E2E tests | Playwright | to add |
-| Package manager | npm | already scaffolded with `package-lock.json` |
+| Framework | Vue | ^3.5.x (Composition API, `<script setup>`) |
+| Build tool | Vite | ^7.x (the previous major, not the brand-new v8 — see note below) |
+| Routing | Vue Router | ^4.6.x (the mature v4 line, not the brand-new v5) |
+| State | Pinia | ^3.x |
+| UI | Vuetify 3 (Material Design) | ^3.13.x (npm's `v3-stable` tag — v4 exists but is too new to trust yet) |
+| HTTP client | axios | ^1.x |
+| Form validation | VeeValidate + yup | ^4.x / ^1.x |
+| Notifications | vue-toastification | `2.0.0-rc.x` — its Vue 3 line has never left release-candidate status (npm's `latest` tag still points at the old Vue 2 `1.x`); used anyway since it's the functional, widely-used Vue 3 version despite never being tagged stable |
+| PDF export | jsPDF + jspdf-autotable | ^4.x / ^5.x |
+| Unit tests | Vitest + @vue/test-utils | ^3.x (paired with Vite 7, not the newer Vitest 4 that tracks Vite 8) |
+| E2E tests | Playwright | ^1.62.x |
+| Package manager | npm | `package-lock.json` committed |
 
-Vuetify was picked for its Material Design system and its `v-data-table` component, which anchors the generic reusable `DataTable.vue` list pattern reused by every feature. axios was picked over bare `fetch` for its centralized config and interceptor support, used to attach the JWT and handle 401s in one place. None of this is set in stone — if a later branch finds a better fit, swap it and update this table.
+Vuetify was picked for its Material Design system and its `v-data-table` component, which anchors the generic reusable `DataTable.vue` list pattern reused by every feature. axios was picked over bare `fetch` for its centralized config and interceptor support, used to attach the JWT and handle 401s in one place. Versions throughout this table deliberately favor the mature/previous major over whatever npm's `latest` tag resolves to, wherever a newer major existed but was judged too recent to trust (Vite 8's new Rolldown-based bundler, Vuetify 4 published only a day before this branch started, Vue Router 5, Pinia 4) — check npm's dist-tags before bumping any of these, `latest` is not automatically the right choice on this project. None of this is set in stone otherwise — if a later branch finds a better fit, swap it and update this table.
 
 `feature/api/core-architecture` already has `sequelize`, `mysql2`, and `sequelize-cli` installed at the backend root (raw `sequelize init` output — `config/config.json`, `models/index.js`, not yet reorganized). That branch's own task list below builds on top of that, reorganizing it into `src/`, rather than discarding and redoing it from scratch.
 
@@ -337,18 +337,29 @@ project convention.
 
 ```
 src/
-├── main.js                        ← app bootstrap (createApp, pinia, router, vuetify)
-├── App.vue                        ← root component (Vuetify nav-drawer shell)
+├── main.js                        ← app bootstrap (createApp, pinia, router, plugins/)
+├── App.vue                        ← minimal: <v-app><router-view /></v-app>
+├── plugins/
+│   └── vuetify.js                 ← createVuetify() isolated here, matching the official
+│                                     `npm create vuetify` scaffolding convention instead of
+│                                     inlining Vuetify config into main.js
+├── layouts/
+│   └── DefaultLayout.vue          ← the v-navigation-drawer + v-app-bar + v-footer shell,
+│                                     composing components/{AppSidebar,AppTopbar,AppFooter}.vue.
+│                                     Kept separate from App.vue (a standard pattern in
+│                                     larger Vue apps) so feature/frontend/auth's login/
+│                                     register pages can render without this chrome later,
+│                                     without refactoring App.vue at that point
 ├── router/
-│   └── index.js                   ← top-level routes (lazy-loaded features via dynamic import)
+│   ├── index.js                   ← top-level routes (lazy-loaded features via dynamic import)
+│   └── guards/
+│       └── auth.guard.js          ← navigation guard (parallel to authGuard)
 ├── stores/
 │   ├── auth.store.js              ← Pinia store: session state (user, isAuthenticated, isAdmin)
 │   └── ...
 ├── services/
 │   ├── api.service.js             ← axios instance, base URL + interceptors (parallel to ApiService)
 │   └── auth-interceptor.js        ← attaches JWT, handles 401 (parallel to jwtInterceptor)
-├── router/guards/
-│   └── auth.guard.js              ← navigation guard (parallel to authGuard)
 ├── components/                    ← shared, reusable across features
 │   ├── AppSidebar.vue
 │   ├── AppTopbar.vue
@@ -357,8 +368,8 @@ src/
 │   └── ConfirmDialog.vue
 ├── views/
 │   └── HomeView.vue                ← placeholder landing page for '/' (already scaffolded)
-└── features/
-    ├── categories/
+└── features/                      ← one folder per domain, not per file-type — the
+    ├── categories/                   recommended split for Vue apps past a certain size
     │   ├── categories.routes.js
     │   ├── services/category.service.js
     │   ├── components/CategoryList.vue
@@ -372,6 +383,7 @@ src/
 
 `DataTable.vue` is built once during `feature/frontend/core-architecture` and reused by every
 later feature's list view instead of each branch hand-rolling search/pagination/export again.
+`DefaultLayout.vue` and `plugins/vuetify.js` are also built once here, for the same reason.
 
 ---
 
@@ -654,12 +666,14 @@ body. View "sent" mail in dev at MailHog's UI, `http://localhost:8025`.
 
 ### Tasks
 
-- [ ] Add Vuetify 3 (`vuetify`, `@mdi/font` for icons), remove/replace the default `create-vue` starter styling (`base.css`/`main.css` from the scaffold, `HelloWorld.vue`/`TheWelcome.vue`/`WelcomeItem.vue` placeholder components)
+- [ ] Add Vuetify 3 (`vuetify`, `@mdi/font` for icons), remove the default `create-vue` starter content (`base.css`/`main.css`, `HelloWorld.vue`/`TheWelcome.vue`/`WelcomeItem.vue` placeholder components, the default `counter.js` store) — this is a fresh `create-vue` scaffold, not a pre-existing admin template to migrate away from (unlike the companion backend's frontend history), so there's nothing else to strip
 - [ ] Add `axios`, `vee-validate` + `yup`, `vue-toastification`, `jspdf` + `jspdf-autotable`
+- [ ] Add `plugins/vuetify.js`: isolated `createVuetify()` config, matching the official `npm create vuetify` scaffolding convention
 - [ ] Add `services/api.service.js`: axios instance with `baseURL` from an env var (Vite's `import.meta.env.VITE_API_URL`, default `http://localhost:3001/api/v1`), returning the full `{ success, message, data?, errors? }` envelope unmodified so feature services can still surface `message`/`errors` — the same "don't unwrap in the shared layer" rule applies to every feature service built on top of it
 - [ ] Add `stores/auth.store.js` (Pinia) and `router/guards/auth.guard.js` as functional placeholders (both read/check a `localStorage` token; nothing sets one until `feature/frontend/auth`)
 - [ ] Add `services/auth-interceptor.js`: axios request/response interceptor wiring, attaches the token if present (placeholder until `feature/frontend/auth` makes it real)
-- [ ] Rebuild `App.vue` as a Vuetify `v-navigation-drawer` + `v-app-bar` shell, composing `components/{AppSidebar,AppTopbar,AppFooter}.vue`
+- [ ] Add `layouts/DefaultLayout.vue`: the Vuetify `v-navigation-drawer` + `v-app-bar` + `v-footer` shell, composing `components/{AppSidebar,AppTopbar,AppFooter}.vue` — kept separate from `App.vue` so `feature/frontend/auth`'s login/register pages can render without this chrome later, without an `App.vue` refactor at that point
+- [ ] Reduce `App.vue` to `<v-app><router-view /></v-app>`
 - [ ] Add a minimal `views/HomeView.vue` placeholder landing page for `/` (the scaffolded one can mostly stay, strip the default Vite/Vue starter content)
 - [ ] Add `components/DataTable.vue`: a generic table (Vuetify `v-data-table` under the hood) with client-side search, pagination (`v-data-table`'s built-in), and PDF export (`jsPDF` + `jspdf-autotable`, dynamically imported) — meant to be reused by every future feature list view instead of each branch rebuilding search/pagination/export from scratch
 - [ ] Set up Playwright for end-to-end tests alongside Vitest for unit tests
@@ -668,11 +682,11 @@ body. View "sent" mail in dev at MailHog's UI, `http://localhost:8025`.
 
 ### Checklist
 
-- [ ] `npm install` succeeds
-- [ ] `npm run dev` serves the Vuetify shell (sidebar/topbar/footer/home) without console errors
-- [ ] `npm run build` succeeds
-- [ ] `npm run test:unit` passes
-- [ ] Playwright e2e passes
+- [x] `npm install` succeeds
+- [x] `npm run dev` serves the Vuetify shell (sidebar/topbar/footer/home) without console errors
+- [x] `npm run build` succeeds
+- [x] `npm run test:unit` passes (9 suites, 20 tests)
+- [x] Playwright e2e passes (2 tests, real Chromium)
 
 ---
 

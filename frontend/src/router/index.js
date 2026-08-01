@@ -1,23 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import HomeView from '@/views/HomeView.vue'
 
+// DefaultLayout is a parent route with its own <router-view /> (nested-routes layout
+// pattern) rather than composed directly in App.vue, so a future route tree without
+// this chrome (feature/frontend/auth's login/register pages) can sit as a sibling of
+// this one instead of needing a layout-switching mechanism in App.vue.
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView
+      component: DefaultLayout,
+      children: [{ path: '', name: 'home', component: HomeView }],
     },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
-    }
-  ]
+  ],
 })
 
 export default router
