@@ -130,11 +130,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# package-lock.json
+# yarn.lock is committed deliberately — CI installs with --frozen-lockfile
 package-lock.json
-
-# yarn.lock
-yarn.lock
 
 # .idea files
 .idea
