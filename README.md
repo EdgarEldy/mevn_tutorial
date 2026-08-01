@@ -705,21 +705,21 @@ First complete vertical slice on top of `feature/frontend/core-architecture`: Ca
 
 ### Tasks
 
-- [ ] Add `features/categories/services/category.service.js`: wraps the shared api service against `/categories`, unwraps the envelope for callers, owns the `vue-toastification` success/error feedback for this resource
-- [ ] Add `components/ConfirmDialog.vue` (shared): a generic yes/no `v-dialog`, introduced here for the delete confirmation and meant to be reused by products/customers/orders
-- [ ] Add `features/categories/components/CategoryForm.vue`: `v-dialog` content with a VeeValidate form (`category_name`, required + max 255 chars, mirroring `category.validation.js`), pre-filled in edit mode
-- [ ] Add `features/categories/components/CategoryList.vue`: thin wrapper configuring the shared `DataTable.vue` (single `category_name` column, edit/delete row actions)
-- [ ] Add `features/categories/pages/CategoriesPage.vue`: route-level page owning the list state (a `ref`/reactive array), opening the form dialog for create/edit and the confirm dialog for delete, reloading the list after every successful mutation
-- [ ] Add `features/categories/categories.routes.js` (dynamic `import()`) and wire it into `router/index.js` under `/categories`
-- [ ] Add the Categories link to `components/AppSidebar.vue`
-- [ ] Vitest unit tests for the service, both dialog components, the list component, and the page component
-- [ ] Code review pass
+- [x] Add `features/categories/services/category.service.js`: wraps the shared api service against `/categories`, unwraps the envelope for callers, owns the `vue-toastification` success/error feedback for this resource
+- [x] Add `components/ConfirmDialog.vue` (shared): a generic yes/no `v-dialog`, introduced here for the delete confirmation and meant to be reused by products/customers/orders
+- [x] Add `features/categories/components/CategoryForm.vue`: `v-dialog` content with a VeeValidate form (`category_name`, required + max 255 chars, mirroring `category.validation.js`), pre-filled in edit mode
+- [x] Add `features/categories/components/CategoryList.vue`: thin wrapper configuring the shared `DataTable.vue` (single `category_name` column, edit/delete row actions)
+- [x] Add `features/categories/pages/CategoriesPage.vue`: route-level page owning the list state (a `ref`/reactive array), opening the form dialog for create/edit and the confirm dialog for delete, reloading the list after every successful mutation
+- [x] Add `features/categories/categories.routes.js` (dynamic `import()`) and wire it into `router/index.js` under `/categories`
+- [x] Add the Categories link to `components/AppSidebar.vue`
+- [x] Vitest unit tests for the service, both dialog components, the list component, and the page component
+- [x] Code review pass
 
 ### Checklist
 
-- [ ] `npm run build` succeeds
-- [ ] `npm run test:unit` passes
-- [ ] Manual check: create, edit, delete, search, and PDF export against the running backend
+- [x] `npm run build` succeeds
+- [x] `npm run test:unit` passes
+- [x] Manual check: create, edit, delete, search, and PDF export against the running backend
 
 ---
 
