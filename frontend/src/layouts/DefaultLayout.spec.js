@@ -18,7 +18,10 @@ const TestHost = {
 function createTestRouter() {
   return createRouter({
     history: createMemoryHistory(),
-    routes: [{ path: '/', component: { template: '<div class="home-stub">home</div>' } }],
+    routes: [
+      { path: '/', component: { template: '<div class="home-stub">home</div>' } },
+      { path: '/categories', component: { template: '<div />' } },
+    ],
   })
 }
 
