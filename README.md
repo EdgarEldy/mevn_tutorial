@@ -511,9 +511,9 @@ Old express-generator scaffold: root `app.js`, `bin/`, `routes/`, `public/`, roo
 
 ### Checklist
 
-- [ ] Nested `category` object present on GET responses
-- [ ] `POST` with non-existent `category_id` returns `404`
-- [ ] Unit and integration tests pass
+- [x] Nested `category` object present on GET responses
+- [x] `POST` with non-existent `category_id` returns `404` (and so does `PUT` when `category_id` is provided and doesn't exist)
+- [x] Unit and integration tests pass (8 suites / 39 unit tests, 2 suites / 20 integration tests)
 
 ---
 
