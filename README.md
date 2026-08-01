@@ -682,11 +682,11 @@ body. View "sent" mail in dev at MailHog's UI, `http://localhost:8025`.
 
 ### Checklist
 
-- [ ] `npm install` succeeds
-- [ ] `npm run dev` serves the Vuetify shell (sidebar/topbar/footer/home) without console errors
-- [ ] `npm run build` succeeds
-- [ ] `npm run test:unit` passes
-- [ ] Playwright e2e passes
+- [x] `npm install` succeeds
+- [x] `npm run dev` serves the Vuetify shell (sidebar/topbar/footer/home) without console errors
+- [x] `npm run build` succeeds
+- [x] `npm run test:unit` passes (9 suites, 20 tests)
+- [x] Playwright e2e passes (2 tests, real Chromium)
 
 ---
 
