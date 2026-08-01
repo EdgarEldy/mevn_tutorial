@@ -7,12 +7,15 @@ import AppSidebar from './AppSidebar.vue'
 function createTestRouter() {
   return createRouter({
     history: createMemoryHistory(),
-    routes: [{ path: '/', component: { template: '<div />' } }],
+    routes: [
+      { path: '/', component: { template: '<div />' } },
+      { path: '/categories', component: { template: '<div />' } },
+    ],
   })
 }
 
 describe('AppSidebar', () => {
-  it('renders a Home nav link (the only route that exists on this branch)', async () => {
+  it('renders a nav link for each registered route', async () => {
     const router = createTestRouter()
     router.push('/')
     await router.isReady()
@@ -20,5 +23,6 @@ describe('AppSidebar', () => {
     const wrapper = mount(AppSidebar, { global: { plugins: [createVuetify(), router] } })
 
     expect(wrapper.text()).toContain('Home')
+    expect(wrapper.text()).toContain('Categories')
   })
 })
