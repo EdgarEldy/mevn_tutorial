@@ -533,9 +533,9 @@ Every field except `id` is nullable — validation is `.optional()` + format che
 
 ### Checklist
 
-- [ ] `POST {}` (empty body) succeeds and creates an all-null customer
-- [ ] `POST` with invalid email format returns `422`
-- [ ] Unit and integration tests pass
+- [x] `POST {}` (empty body) succeeds and creates an all-null customer
+- [x] `POST` with invalid email format returns `422`
+- [x] Unit and integration tests pass (9 suites / 47 unit tests, 3 suites / 30 integration tests)
 
 ---
 
