@@ -249,14 +249,13 @@ users ──< role_user >── roles ──< role_permission >── permission
 | `customers`, `orders` | Authenticated | Admin role (see note) |
 | `auth/*` | Public | — |
 
-**Note:** this table describes the *intended* policy, not necessarily the current
-implementation status. A policy table like this is only useful if it stays honest — if
-role-gating is ever implemented only in the frontend UI (hiding buttons for non-admins)
-without a real backend `authorize(role)` middleware, that's a courtesy, not a security
-boundary, and this table must say so explicitly rather than implying enforcement that doesn't
-exist. Before starting `feature/api/auth`, decide explicitly — and record the decision in this
-README — whether this repo implements backend `authorize(role)` middleware on these routes for
-real, or knowingly defers it.
+**Decision (recorded, not left open):** this table is enforced for real. `feature/api/auth` adds
+an `authorize(role)` middleware applied to the POST/PUT/DELETE routes of `categories`,
+`products`, `customers`, `orders` (REST) and the equivalent GraphQL order mutations — not just
+frontend UI-only role gating. This is a deliberate departure from the reference implementation
+this project's backend is otherwise modeled on, which shipped JWT auth with no backend role
+enforcement at all (role-gating only in the Angular UI, a courtesy rather than a security
+boundary). `authorize.middleware.js` has no equivalent to adapt from there — it's new.
 
 ---
 
@@ -584,7 +583,7 @@ reusing the same `order.service.js` from both the REST controller and the GraphQ
 
 ## feature/api/auth
 
-Full JWT authentication — register, account activation, login, logout, password reset — with **real email delivery from the start** (see the lessons section below for why this matters).
+Full JWT authentication — register, account activation, login, logout, password reset — with **real email delivery from the start** (see the lessons section below for why this matters). Also implements real backend RBAC enforcement (see [Auth model → Authorization rules](#auth-model-eer_auth)): an `authorize(role)` middleware retrofitted onto the mutating routes of the four already-merged resource modules, plus the GraphQL order mutations.
 
 ### Endpoints
 
@@ -599,7 +598,15 @@ Full JWT authentication — register, account activation, login, logout, passwor
 
 ### Files (one commit each)
 
-Migrations (8, including `createdAt`/`updatedAt` on the two pivot tables from the start) → Models (6) → Seeders (2) → Repositories (5) → `shared/utils/mailer.js` → `auth.middleware.js` → `auth.validation.js` → `auth.service.js` → `auth.controller.js` → `auth.routes.js` → `app.js` (mount) → unit tests → integration tests (including MailHog-backed email assertions, from this branch's first commit, not as a later fix)
+Migrations (8, including `createdAt`/`updatedAt` on the two pivot tables from the start) → Models (6) → Seeders (2) → Repositories (5) → `shared/utils/mailer.js` → `auth.middleware.js` (full 7-step version, upgrading the core-architecture skeleton) → `authorize.middleware.js` (new — no equivalent in the reference implementation) → `auth.validation.js` → `auth.service.js` → `auth.controller.js` → `auth.routes.js` → `app.js` (mount) → retrofit `authorize('admin')` onto `category.routes.js`/`product.routes.js`/`customer.routes.js`/`order.routes.js`'s POST/PUT/DELETE routes and the GraphQL order mutations → unit tests → integration tests (including MailHog-backed email assertions and RBAC assertions, from this branch's first commit, not as a later fix)
+
+### Authorization middleware (`authorize.middleware.js`)
+
+Runs after `auth.middleware.js` (so `req.user` with its roles is already populated). Checks the
+authenticated user has the required role; `403` if not. Applied only to POST/PUT/DELETE on
+`categories`/`products`/`customers`/`orders` (REST) and `createOrder`/`updateOrder`/`deleteOrder`
+(GraphQL) — GET stays public/authenticated-only per the Authorization rules table, unchanged by
+this branch.
 
 ### Seeders
 
@@ -636,7 +643,8 @@ body. View "sent" mail in dev at MailHog's UI, `http://localhost:8025`.
 - [ ] `POST /logout` + subsequent request with same token returns `401`
 - [ ] `POST /forgot-password` sends a reset email only when the account exists, but returns the byte-identical response either way (own integration test asserting this explicitly)
 - [ ] `POST /reset-password` with expired token returns `400`
-- [ ] Unit tests (`tests/unit/auth.service.test.js`) and integration tests (`tests/integration/auth.test.js`, including real MailHog verification) pass from this branch's first PR, not bolted on afterward
+- [ ] A non-admin authenticated user gets `403` on POST/PUT/DELETE for categories/products/customers/orders (REST) and the GraphQL order mutations; an admin succeeds
+- [ ] Unit tests (`tests/unit/auth.service.test.js`) and integration tests (`tests/integration/auth.test.js`, including real MailHog verification and the RBAC checks above) pass from this branch's first PR, not bolted on afterward
 
 ---
 
@@ -804,16 +812,13 @@ Fourth vertical slice: a form with two cross-feature dropdowns and a live comput
 
 Fifth and final frontend slice: real authentication replaces the placeholders left by `feature/frontend/core-architecture`, plus role-gated UI retrofitted into all four earlier features.
 
-### Scope decision to make explicitly before starting (don't default silently)
+### Scope decision (recorded, see Auth model → Authorization rules above)
 
-Decide and record here: is backend RBAC route enforcement (an `authorize(role)` middleware on
-categories/products/customers/orders) being implemented for real in this repo's
-`feature/api/*` branches, or is this branch frontend-only (route guard + UI-only role gating,
-no backend enforcement)? See the note under
-[Auth model → Authorization rules](#auth-model-eer_auth) above. Whichever is chosen, the
-README and the code comments on every `isAdmin`-style check must say so accurately — don't
-let a UI-only courtesy check read as if it were a real security boundary, and don't let a
-`README` table imply enforcement that was never built.
+Backend RBAC route enforcement is real, not UI-only: `feature/api/auth` adds an `authorize(role)`
+middleware on categories/products/customers/orders. This branch's `isAdmin`-gated UI (below) is
+therefore a real second layer, not the *only* layer — code comments on every `isAdmin` check
+should say so accurately: hiding the button is a UX nicety on top of a real backend boundary,
+not a substitute for one.
 
 ### Tasks
 
