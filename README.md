@@ -49,6 +49,7 @@ Repository: https://github.com/EdgarEldy/mevn_tutorial
 | Migrations & Seeders | Sequelize CLI | ^6.6.2 |
 | Validation | express-validator | ^7.2.1 |
 | CORS | cors | ^2.8.6 |
+| GraphQL (orders only) | Apollo Server + @as-integrations/express5 + graphql | ^5.0.0 / ^1.1.2 / ^16.9.0 |
 | Authentication | jsonwebtoken + bcryptjs | ^9.0.2 / ^3.0.2 |
 | Email (dev) | nodemailer + MailHog | ^6.9.16 |
 | Environment | dotenv | ^16.4.7 |
@@ -541,7 +542,13 @@ Every field except `id` is nullable — validation is `.optional()` + format che
 
 ## feature/api/orders
 
-### Endpoints
+**Decision (recorded, not left open):** orders are exposed over **both REST and GraphQL**, not
+REST-only. `GET/POST/PUT/DELETE /api/v1/orders` stay fully functional; `/api/v1/graphql`
+(Apollo Server 5 + `@as-integrations/express5`) adds an orders-only GraphQL schema on top,
+reusing the same `order.service.js` from both the REST controller and the GraphQL resolvers.
+`feature/frontend/orders` consumes the GraphQL endpoint, not REST — see that section.
+
+### REST endpoints
 
 | Method | URL | Description |
 |---|---|---|
@@ -551,17 +558,27 @@ Every field except `id` is nullable — validation is `.optional()` + format che
 | PUT | `/api/v1/orders/:id` | Update an order (`total` recomputed) |
 | DELETE | `/api/v1/orders/:id` | Delete an order |
 
+### GraphQL schema (`/api/v1/graphql`)
+
+| Operation | Name | Description |
+|---|---|---|
+| Query | `orders` | List all orders |
+| Query | `order(id)` | Single order |
+| Mutation | `createOrder(input)` | Create an order (`total` computed automatically) |
+| Mutation | `updateOrder(id, input)` | Update an order (`total` recomputed) |
+| Mutation | `deleteOrder(id)` | Delete an order |
+
 ### Business logic
 
-`total = quantity × product.unit_price` — computed in the service layer on create and update. The client never sends `total`; any client-supplied value is silently ignored, never trusted.
+`total = quantity × product.unit_price` — computed in the service layer on create and update, shared by both the REST controller and the GraphQL resolvers. The client never sends `total`; any client-supplied value is silently ignored, never trusted.
 
 ### Checklist
 
-- [ ] `POST` with unknown `product_id` returns `404`
+- [ ] `POST` with unknown `product_id` returns `404` (REST) / `createOrder` rejects an unknown `product_id` (GraphQL)
 - [ ] `POST` without `quantity` returns `422`
-- [ ] Response `total` matches `quantity × unit_price`
-- [ ] Nested `customer`, `product`, and `product.category` present on responses
-- [ ] Unit and integration tests pass
+- [ ] Response `total` matches `quantity × unit_price` on both REST and GraphQL
+- [ ] Nested `customer`, `product`, and `product.category` present on responses (both REST and GraphQL)
+- [ ] Unit and integration tests pass, including a GraphQL integration test (not just REST)
 
 ---
 
@@ -751,24 +768,23 @@ Third vertical slice, same CRUD pattern as categories/products but with the oppo
 
 Fourth vertical slice: a form with two cross-feature dropdowns and a live computed total.
 
-Decide explicitly whether `feature/api/orders` should expose a GraphQL schema for orders in
-addition to REST, before starting this branch — if the backend stays REST-only for orders (the
-simpler default, and consistent with every other resource here, unless GraphQL is deliberately
-added to `feature/api/orders` first), this branch is REST-only too and any GraphQL-specific
-tasks don't apply. Don't silently assume either way.
+**Decision (recorded, see `feature/api/orders` above):** this feature consumes orders over
+**GraphQL**, not REST — `feature/api/orders` exposes `/api/v1/graphql` specifically for this.
 
-### Endpoints consumed (REST case)
+### GraphQL operations consumed
 
-| Method | URL | Description |
+| Operation | Name | Description |
 |---|---|---|
-| GET | `/api/v1/orders` | List all orders |
-| POST | `/api/v1/orders` | Create an order |
-| PUT | `/api/v1/orders/:id` | Update an order |
-| DELETE | `/api/v1/orders/:id` | Delete an order |
+| Query | `orders` | List all orders |
+| Query | `order(id)` | Single order |
+| Mutation | `createOrder(input)` | Create an order |
+| Mutation | `updateOrder(id, input)` | Update an order |
+| Mutation | `deleteOrder(id)` | Delete an order |
 
 ### Tasks
 
-- [ ] Add `features/orders/services/order.service.js`: same unwrap + toast + rethrow shape as the other feature services
+- [ ] Add `services/graphql.service.js` (shared, in `services/`): a thin POST wrapper around `/api/v1/graphql`, the GraphQL counterpart to `api.service.js`. Treats a non-empty `errors` array as the primary failure signal instead of HTTP status, since Apollo Server returns 200 even when a resolver throws
+- [ ] Add `features/orders/services/order.service.js`: uses `graphql.service.js` instead of `api.service.js`, otherwise the same unwrap + toast + rethrow shape as the other feature services
 - [ ] Add `features/orders/components/OrderForm.vue`: two cross-feature dropdowns (customer, product, reusing the existing customer/product services). A `computed()` `total` derived from the selected product's `unit_price` × `quantity` mirrors the server-side calculation live, before the order is even submitted — this is a good showcase for Vue's `computed()` for deriving reactive state
 - [ ] Add `features/orders/components/OrderList.vue`: shared `DataTable.vue` wrapper (customer/product/quantity/total columns, each falling back if customer/product is ever null) plus a computed total revenue
 - [ ] Add `features/orders/pages/OrdersPage.vue`: same page-level pattern as the other features
