@@ -1,0 +1,12 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "${PORT:-3001}:3001"
+    env_file: ./backend/.env
+    networks:
+      - mevn_net
+
+networks:
+  mevn_net:
+    external: true
