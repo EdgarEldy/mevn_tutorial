@@ -487,11 +487,11 @@ Old express-generator scaffold: root `app.js`, `bin/`, `routes/`, `public/`, roo
 
 ### Checklist
 
-- [ ] All 5 endpoints return the standard response envelope
-- [ ] `POST` returns `201`; missing `category_name` returns `422`
-- [ ] `GET /:id` returns `404` for unknown id
-- [ ] Unit tests pass
-- [ ] Integration tests pass (`sequelize.sync({ force: true })` in `beforeAll`)
+- [x] All 5 endpoints return the standard response envelope
+- [x] `POST` returns `201`; missing `category_name` returns `422`
+- [x] `GET /:id` returns `404` for unknown id
+- [x] Unit tests pass (7 suites, 29 tests)
+- [x] Integration tests pass (`sequelize.sync({ force: true })` in `beforeAll`, 9 tests)
 
 ---
 
