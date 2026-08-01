@@ -3,6 +3,7 @@
 const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@as-integrations/express5');
 const schema = require('./schema');
+const buildContext = require('./authContext');
 
 // Single source of truth for turning a schema into a running Apollo Server and
 // mounting it on an Express router at '/graphql'. Used by both server.js and
@@ -11,7 +12,7 @@ const schema = require('./schema');
 async function mountGraphQL(router, plugins = []) {
   const apolloServer = new ApolloServer({ ...schema, plugins });
   await apolloServer.start();
-  router.use('/graphql', expressMiddleware(apolloServer));
+  router.use('/graphql', expressMiddleware(apolloServer, { context: buildContext }));
   return apolloServer;
 }
 
