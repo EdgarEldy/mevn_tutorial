@@ -11,8 +11,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test:unit": "jest tests/unit --runInBand --forceExit",
-    "test:integration": "jest tests/integration --runInBand --forceExit --passWithNoTests",
-    "test": "jest --runInBand --forceExit",
+    "test:integration": "NODE_ENV=test jest tests/integration --runInBand --forceExit --passWithNoTests",
+    "test": "NODE_ENV=test jest --runInBand --forceExit",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
     "db:seed": "sequelize-cli db:seed:all"
