@@ -1,9 +1,10 @@
 <script setup>
-// Categories/products/customers/orders links are added one at a time by their own
-// feature branches (see the README's per-branch task lists), not all upfront here -
-// none of those routes exist yet, so linking to them now would just produce Vue
-// Router "No match found" warnings.
-const links = [{ to: '/', icon: 'mdi-home', label: 'Home' }]
+// Products/customers/orders links are added by their own feature branches (see the
+// README's per-branch task lists), not all upfront here - those routes don't exist yet.
+const links = [
+  { to: '/', icon: 'mdi-home', label: 'Home' },
+  { to: '/categories', icon: 'mdi-shape', label: 'Categories' },
+]
 </script>
 
 <template>
