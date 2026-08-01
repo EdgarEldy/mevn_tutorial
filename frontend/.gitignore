@@ -29,8 +29,8 @@ coverage
 
 *.tsbuildinfo
 
-# package-lock.json
-package-lock.json
+# Vite cache
+.vite
 
-# yarn.lock
+# yarn.lock — this project uses npm, package-lock.json is committed deliberately
 yarn.lock
