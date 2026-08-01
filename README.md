@@ -574,11 +574,11 @@ reusing the same `order.service.js` from both the REST controller and the GraphQ
 
 ### Checklist
 
-- [ ] `POST` with unknown `product_id` returns `404` (REST) / `createOrder` rejects an unknown `product_id` (GraphQL)
-- [ ] `POST` without `quantity` returns `422`
-- [ ] Response `total` matches `quantity × unit_price` on both REST and GraphQL
-- [ ] Nested `customer`, `product`, and `product.category` present on responses (both REST and GraphQL)
-- [ ] Unit and integration tests pass, including a GraphQL integration test (not just REST)
+- [x] `POST` with unknown `product_id` returns `404` (REST) / `createOrder` rejects an unknown `product_id` (GraphQL) — same for `customer_id` on both, an enhancement beyond the original checklist
+- [x] `POST` without `quantity` returns `422`
+- [x] Response `total` matches `quantity × unit_price` on both REST and GraphQL
+- [x] Nested `customer`, `product`, and `product.category` present on responses (both REST and GraphQL)
+- [x] Unit and integration tests pass, including a GraphQL integration test (10 unit suites / 60 tests, 5 integration suites / 48 tests)
 
 ---
 
