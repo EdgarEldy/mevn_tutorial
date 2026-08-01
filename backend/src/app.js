@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const v1 = express.Router();
+v1.use('/categories', require('./modules/categories/category.routes'));
 app.use('/api/v1', v1);
 
 app.get('/', (req, res) => {
