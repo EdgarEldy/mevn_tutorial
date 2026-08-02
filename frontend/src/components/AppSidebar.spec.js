@@ -11,6 +11,7 @@ function createTestRouter() {
       { path: '/', component: { template: '<div />' } },
       { path: '/categories', component: { template: '<div />' } },
       { path: '/products', component: { template: '<div />' } },
+      { path: '/customers', component: { template: '<div />' } },
     ],
   })
 }
@@ -26,5 +27,6 @@ describe('AppSidebar', () => {
     expect(wrapper.text()).toContain('Home')
     expect(wrapper.text()).toContain('Categories')
     expect(wrapper.text()).toContain('Products')
+    expect(wrapper.text()).toContain('Customers')
   })
 })

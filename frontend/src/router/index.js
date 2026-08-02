@@ -3,6 +3,7 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import HomeView from '@/views/HomeView.vue'
 import categoriesRoutes from '@/features/categories/categories.routes'
 import productsRoutes from '@/features/products/products.routes'
+import customersRoutes from '@/features/customers/customers.routes'
 
 // DefaultLayout is a parent route with its own <router-view /> (nested-routes layout
 // pattern) rather than composed directly in App.vue, so a future route tree without
@@ -14,7 +15,12 @@ const router = createRouter({
     {
       path: '/',
       component: DefaultLayout,
-      children: [{ path: '', name: 'home', component: HomeView }, ...categoriesRoutes, ...productsRoutes],
+      children: [
+        { path: '', name: 'home', component: HomeView },
+        ...categoriesRoutes,
+        ...productsRoutes,
+        ...customersRoutes,
+      ],
     },
   ],
 })
