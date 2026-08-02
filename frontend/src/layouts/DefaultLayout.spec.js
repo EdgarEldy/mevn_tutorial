@@ -22,6 +22,7 @@ function createTestRouter() {
       { path: '/', component: { template: '<div class="home-stub">home</div>' } },
       { path: '/categories', component: { template: '<div />' } },
       { path: '/products', component: { template: '<div />' } },
+      { path: '/customers', component: { template: '<div />' } },
     ],
   })
 }
