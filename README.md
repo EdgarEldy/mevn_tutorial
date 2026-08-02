@@ -769,20 +769,20 @@ Third vertical slice, same CRUD pattern as categories/products but with the oppo
 
 ### Tasks
 
-- [ ] Add `features/customers/services/customer.service.js`: same shape as the others, wraps `/customers`
-- [ ] Add `features/customers/components/CustomerForm.vue`: VeeValidate form with no required-field rule anywhere, only format checks (email, a permissive telephone pattern), matching the backend's fully-optional validation
-- [ ] **Before wiring the submit handler, read the lesson below about stripping blank fields** — do not send unfilled fields as empty strings
-- [ ] Add `features/customers/components/CustomerList.vue`: shared `DataTable.vue` wrapper (name/email/telephone columns), each falling back to a placeholder instead of rendering `null`/empty for an unset field
-- [ ] Add `features/customers/pages/CustomersPage.vue`: same page-level pattern as categories/products
-- [ ] Add `features/customers/customers.routes.js` and wire it into `router/index.js` under `/customers`; add the Customers link to the sidebar
-- [ ] Vitest unit tests for the service, form component (including the blank-fields stripping), list component, and page component
-- [ ] Code review pass
+- [x] Add `features/customers/services/customer.service.js`: same shape as the others, wraps `/customers`
+- [x] Add `features/customers/components/CustomerForm.vue`: VeeValidate form with no required-field rule anywhere, only format checks (email, a permissive telephone pattern), matching the backend's fully-optional validation
+- [x] **Before wiring the submit handler, read the lesson below about stripping blank fields** — do not send unfilled fields as empty strings
+- [x] Add `features/customers/components/CustomerList.vue`: shared `DataTable.vue` wrapper (name/email/telephone columns), each falling back to a placeholder instead of rendering `null`/empty for an unset field
+- [x] Add `features/customers/pages/CustomersPage.vue`: same page-level pattern as categories/products
+- [x] Add `features/customers/customers.routes.js` and wire it into `router/index.js` under `/customers`; add the Customers link to the sidebar
+- [x] Vitest unit tests for the service, form component (including the blank-fields stripping), list component, and page component
+- [x] Code review pass
 
 ### Checklist
 
-- [ ] `npm run build` succeeds
-- [ ] `npm run test:unit` passes
-- [ ] Manual check: create a customer with only some fields filled in, edit, delete, against the running backend
+- [x] `npm run build` succeeds
+- [x] `npm run test:unit` passes
+- [x] Manual check: create a customer with only some fields filled in, edit, delete, against the running backend
 
 ---
 
@@ -960,6 +960,13 @@ Concrete pitfalls to watch for, kept here so they aren't rediscovered the hard w
    system is *supposed* to do, and keep the actual implementation status honestly in sync with
    it — including explicitly saying so when enforcement is deferred, same as the note under
    [Auth model](#auth-model-eer_auth) above requires.
+
+9. **`express-validator`'s `.optional()` doesn't skip an empty string.** It only skips a field
+   that's entirely absent from the request body (or `null`, with `{ nullable: true }`) — a
+   present-but-empty string like `email: ''` still runs `isEmail()` and fails, even though the
+   field is meant to be fully optional. Any frontend form backed by an all-optional validation
+   shape (see [feature/frontend/customers](#featurefrontendcustomers)) must strip blank fields
+   out of the submit payload entirely rather than sending them as empty strings.
 
 ---
 
