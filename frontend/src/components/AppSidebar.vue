@@ -1,10 +1,11 @@
 <script setup>
-// Customers/orders links are added by their own feature branches (see the README's
-// per-branch task lists), not all upfront here - those routes don't exist yet.
+// Orders link is added by its own feature branch (see the README's per-branch task
+// lists), not upfront here - that route doesn't exist yet.
 const links = [
   { to: '/', icon: 'mdi-home', label: 'Home' },
   { to: '/categories', icon: 'mdi-shape', label: 'Categories' },
   { to: '/products', icon: 'mdi-package-variant', label: 'Products' },
+  { to: '/customers', icon: 'mdi-account-group', label: 'Customers' },
 ]
 </script>
 
