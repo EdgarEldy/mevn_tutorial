@@ -738,19 +738,19 @@ Second vertical slice, same CRUD pattern as categories plus the codebase's one s
 
 ### Tasks
 
-- [ ] Add `features/products/services/product.service.js`: same shape as `category.service.js`, wraps `/products`
-- [ ] Add `features/products/components/ProductForm.vue`: VeeValidate form (`product_name` required + max 255, `unit_price` required + min 0, `category_id` required) mirroring `product.validation.js`. Loads categories via the categories feature's service (the one sanctioned cross-feature import) and adds an async validator on `category_id` re-checking the selected id against the loaded list, guarding against a category deleted between page load and submit
-- [ ] Add `features/products/components/ProductList.vue`: shared `DataTable.vue` wrapper (name/category/unit price columns) with a computed product count; category name read straight off the row (already resolved by the backend), falling back to "Uncategorized" for a freshly created row (see the products endpoint note above — the create response has no nested category)
-- [ ] Add `features/products/pages/ProductsPage.vue`: same page-level pattern as categories
-- [ ] Add `features/products/products.routes.js` and wire it into `router/index.js` under `/products`; add the Products link to the sidebar
-- [ ] Vitest unit tests for the service, form component (including the async validator and a guard against submitting while it's still pending), list component, and page component
-- [ ] Code review pass
+- [x] Add `features/products/services/product.service.js`: same shape as `category.service.js`, wraps `/products`
+- [x] Add `features/products/components/ProductForm.vue`: VeeValidate form (`product_name` required + max 255, `unit_price` required + min 0, `category_id` required) mirroring `product.validation.js`. Loads categories via the categories feature's service (the one sanctioned cross-feature import) and adds a yup test on `category_id` re-checking the selected id against the loaded list, guarding against a category deleted between page load and submit
+- [x] Add `features/products/components/ProductList.vue`: shared `DataTable.vue` wrapper (name/category/unit price columns); category name read straight off the row (already resolved by the backend), falling back to "Uncategorized" for a freshly created row (see the products endpoint note above — the create response has no nested category)
+- [x] Add `features/products/pages/ProductsPage.vue`: same page-level pattern as categories
+- [x] Add `features/products/products.routes.js` and wire it into `router/index.js` under `/products`; add the Products link to the sidebar
+- [x] Vitest unit tests for the service, form component (including the category-not-found validation edge case), list component, and page component
+- [x] Code review pass
 
 ### Checklist
 
-- [ ] `npm run build` succeeds
-- [ ] `npm run test:unit` passes
-- [ ] Manual check: create, edit, delete (including the category dropdown and its async validation) against the running backend
+- [x] `npm run build` succeeds
+- [x] `npm run test:unit` passes
+- [x] Manual check: create, edit, delete (including the category dropdown and its validation) against the running backend
 
 ---
 

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import HomeView from '@/views/HomeView.vue'
 import categoriesRoutes from '@/features/categories/categories.routes'
+import productsRoutes from '@/features/products/products.routes'
 
 // DefaultLayout is a parent route with its own <router-view /> (nested-routes layout
 // pattern) rather than composed directly in App.vue, so a future route tree without
@@ -13,7 +14,7 @@ const router = createRouter({
     {
       path: '/',
       component: DefaultLayout,
-      children: [{ path: '', name: 'home', component: HomeView }, ...categoriesRoutes],
+      children: [{ path: '', name: 'home', component: HomeView }, ...categoriesRoutes, ...productsRoutes],
     },
   ],
 })
