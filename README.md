@@ -805,20 +805,20 @@ Fourth vertical slice: a form with two cross-feature dropdowns and a live comput
 
 ### Tasks
 
-- [ ] Add `services/graphql.service.js` (shared, in `services/`): a thin POST wrapper around `/api/v1/graphql`, the GraphQL counterpart to `api.service.js`. Treats a non-empty `errors` array as the primary failure signal instead of HTTP status, since Apollo Server returns 200 even when a resolver throws
-- [ ] Add `features/orders/services/order.service.js`: uses `graphql.service.js` instead of `api.service.js`, otherwise the same unwrap + toast + rethrow shape as the other feature services
-- [ ] Add `features/orders/components/OrderForm.vue`: two cross-feature dropdowns (customer, product, reusing the existing customer/product services). A `computed()` `total` derived from the selected product's `unit_price` × `quantity` mirrors the server-side calculation live, before the order is even submitted — this is a good showcase for Vue's `computed()` for deriving reactive state
-- [ ] Add `features/orders/components/OrderList.vue`: shared `DataTable.vue` wrapper (customer/product/quantity/total columns, each falling back if customer/product is ever null) plus a computed total revenue
-- [ ] Add `features/orders/pages/OrdersPage.vue`: same page-level pattern as the other features
-- [ ] Add `features/orders/orders.routes.js` and wire it into `router/index.js`; add the Orders link to the sidebar
-- [ ] Vitest unit tests for the service, form component (including the computed total), list component, and page component
-- [ ] Code review pass
+- [x] Add `services/graphql.service.js` (shared, in `services/`): a thin POST wrapper around `/api/v1/graphql`, the GraphQL counterpart to `api.service.js`. Treats a non-empty `errors` array as the primary failure signal instead of HTTP status, since Apollo Server returns 200 even when a resolver throws
+- [x] Add `features/orders/services/order.service.js`: uses `graphql.service.js` instead of `api.service.js`, otherwise the same unwrap + toast + rethrow shape as the other feature services
+- [x] Add `features/orders/components/OrderForm.vue`: two cross-feature dropdowns (customer, product, reusing the existing customer/product services). A `computed()` `total` derived from the selected product's `unit_price` × `quantity` mirrors the server-side calculation live, before the order is even submitted — this is a good showcase for Vue's `computed()` for deriving reactive state
+- [x] Add `features/orders/components/OrderList.vue`: shared `DataTable.vue` wrapper (customer/product/quantity/total columns, each falling back if customer/product is ever null) plus a computed total revenue
+- [x] Add `features/orders/pages/OrdersPage.vue`: same page-level pattern as the other features
+- [x] Add `features/orders/orders.routes.js` and wire it into `router/index.js`; add the Orders link to the sidebar
+- [x] Vitest unit tests for the service, form component (including the computed total), list component, and page component
+- [x] Code review pass
 
 ### Checklist
 
-- [ ] `npm run build` succeeds
-- [ ] `npm run test:unit` passes
-- [ ] Manual check: create/edit/delete an order (including the live total) against the running backend
+- [x] `npm run build` succeeds
+- [x] `npm run test:unit` passes
+- [x] Manual check: create/edit/delete an order (including the live total) against the running backend
 
 ---
 

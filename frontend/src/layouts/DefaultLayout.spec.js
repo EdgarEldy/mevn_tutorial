@@ -23,6 +23,7 @@ function createTestRouter() {
       { path: '/categories', component: { template: '<div />' } },
       { path: '/products', component: { template: '<div />' } },
       { path: '/customers', component: { template: '<div />' } },
+      { path: '/orders', component: { template: '<div />' } },
     ],
   })
 }
