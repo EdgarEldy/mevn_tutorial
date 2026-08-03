@@ -25,21 +25,39 @@ function decodeQuotedPrintable(body) {
   return body.replace(/=\r?\n/g, '').replace(/=([0-9A-F]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 // Fetches the most recent message addressed to `email` and pulls a token out of a link
 // matching `pathPrefix` (e.g. '/auth/activate/'). Filtering by recipient (rather than
 // just grabbing the single latest message) matters because Playwright runs test files
 // in parallel workers, so multiple tests can be registering accounts and sending mail
 // through the same MailHog instance at close to the same time.
+//
+// Polls for up to 5 seconds instead of fetching once: the backend awaits the SMTP send
+// before its HTTP response resolves (see auth.service.js's register()), so the message
+// has been handed to MailHog by the time the frontend's "Check your email" confirmation
+// appears - but MailHog accepting a message over SMTP and that message being indexed and
+// queryable through its own HTTP API aren't the same instant, and the gap between them
+// was wide enough to fail this lookup outright on a CI runner's more limited resources
+// (never reproduced locally, where MailHog is a long-running, already-warm container).
 export async function extractTokenFromLatestEmailTo(email, pathPrefix) {
-  const response = await fetch(`${MAILHOG_URL}/api/v2/messages?limit=50`)
-  const data = await response.json()
-  const message = data.items.find((item) => item.Content.Headers.To?.[0] === email)
-  if (!message) {
-    throw new Error(`No MailHog message found addressed to ${email} (checked the ${data.items.length} most recent).`)
+  const deadline = Date.now() + 5000
+  let lastCheckedCount = 0
+  while (Date.now() < deadline) {
+    const response = await fetch(`${MAILHOG_URL}/api/v2/messages?limit=50`)
+    const data = await response.json()
+    lastCheckedCount = data.items.length
+    const message = data.items.find((item) => item.Content.Headers.To?.[0] === email)
+    if (message) {
+      const decoded = decodeQuotedPrintable(message.Content.Body)
+      const match = decoded.match(new RegExp(`${pathPrefix}([a-zA-Z0-9]+)`))
+      return match[1]
+    }
+    await sleep(250)
   }
-  const decoded = decodeQuotedPrintable(message.Content.Body)
-  const match = decoded.match(new RegExp(`${pathPrefix}([a-zA-Z0-9]+)`))
-  return match[1]
+  throw new Error(`No MailHog message found addressed to ${email} (checked the ${lastCheckedCount} most recent).`)
 }
 
 // Registers a fresh admin user against the real backend, activates it via the real
