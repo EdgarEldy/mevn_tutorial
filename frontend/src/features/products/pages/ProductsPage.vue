@@ -1,9 +1,13 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import productService from '../services/product.service'
 import ProductList from '../components/ProductList.vue'
 import ProductForm from '../components/ProductForm.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { useAuthStore } from '@/stores/auth.store'
+
+const { isAdmin } = storeToRefs(useAuthStore())
 
 const products = ref([])
 const loading = ref(false)
@@ -71,11 +75,11 @@ onMounted(load)
     <v-card-title>Products</v-card-title>
     <v-progress-linear v-if="loading" indeterminate />
     <v-card-text>
-      <div class="d-flex justify-end mb-2">
+      <div v-if="isAdmin" class="d-flex justify-end mb-2">
         <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">New product</v-btn>
       </div>
 
-      <ProductList :products="products" @edit="openEdit" @delete="confirmDelete" />
+      <ProductList :products="products" :is-admin="isAdmin" @edit="openEdit" @delete="confirmDelete" />
     </v-card-text>
 
     <ProductForm v-model="formOpen" :product="editingProduct" @submit="handleSubmit" />
