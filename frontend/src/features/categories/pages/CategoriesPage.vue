@@ -1,9 +1,13 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import categoryService from '../services/category.service'
 import CategoryList from '../components/CategoryList.vue'
 import CategoryForm from '../components/CategoryForm.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { useAuthStore } from '@/stores/auth.store'
+
+const { isAdmin } = storeToRefs(useAuthStore())
 
 const categories = ref([])
 const loading = ref(false)
@@ -71,11 +75,11 @@ onMounted(load)
     <v-card-title>Categories</v-card-title>
     <v-progress-linear v-if="loading" indeterminate />
     <v-card-text>
-      <div class="d-flex justify-end mb-2">
+      <div v-if="isAdmin" class="d-flex justify-end mb-2">
         <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">New category</v-btn>
       </div>
 
-      <CategoryList :categories="categories" @edit="openEdit" @delete="confirmDelete" />
+      <CategoryList :categories="categories" :is-admin="isAdmin" @edit="openEdit" @delete="confirmDelete" />
     </v-card-text>
 
     <CategoryForm v-model="formOpen" :category="editingCategory" @submit="handleSubmit" />
