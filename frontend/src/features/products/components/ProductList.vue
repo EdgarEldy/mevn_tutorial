@@ -1,8 +1,10 @@
 <script setup>
+import { computed } from 'vue'
 import DataTable from '@/components/DataTable.vue'
 
-defineProps({
+const props = defineProps({
   products: { type: Array, required: true },
+  isAdmin: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['edit', 'delete'])
@@ -15,11 +17,17 @@ const columns = [
   { key: 'unit_price', header: 'Unit price', value: (row) => `$${Number(row.unit_price).toFixed(2)}` },
 ]
 
-// No isAdmin gating yet: deferred to feature/frontend/auth, same as CategoryList.vue.
-const actions = [
-  { icon: 'mdi-pencil', label: 'Edit', handler: (row) => emit('edit', row) },
-  { icon: 'mdi-delete', label: 'Delete', handler: (row) => emit('delete', row) },
-]
+// UI-only role gating: hides the edit/delete actions for non-admins. The backend already
+// enforces this for real on the mutating routes (see authorize.middleware.js), so this is
+// a UX nicety on top of a real backend boundary, not a substitute for one.
+const actions = computed(() =>
+  props.isAdmin
+    ? [
+        { icon: 'mdi-pencil', label: 'Edit', handler: (row) => emit('edit', row) },
+        { icon: 'mdi-delete', label: 'Delete', handler: (row) => emit('delete', row) },
+      ]
+    : [],
+)
 </script>
 
 <template>

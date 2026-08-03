@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createVuetify } from 'vuetify'
+import { createPinia, setActivePinia } from 'pinia'
 import CategoriesPage from './CategoriesPage.vue'
 import CategoryList from '../components/CategoryList.vue'
 import CategoryForm from '../components/CategoryForm.vue'
@@ -28,6 +29,13 @@ describe('CategoriesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     categoryService.getAll.mockResolvedValue(categories)
+    localStorage.setItem('token', 'test-token')
+    localStorage.setItem('user', JSON.stringify({ id: 1, roles: [{ role_name: 'admin' }] }))
+    setActivePinia(createPinia())
+  })
+
+  afterEach(() => {
+    localStorage.clear()
   })
 
   it('loads categories on mount and passes them to CategoryList', async () => {
@@ -118,5 +126,15 @@ describe('CategoriesPage', () => {
 
     expect(categoryService.remove).toHaveBeenCalledWith(1)
     expect(categoryService.getAll).toHaveBeenCalledTimes(2)
+  })
+
+  it('hides the "New category" button for a non-admin', async () => {
+    localStorage.setItem('user', JSON.stringify({ id: 2, roles: [{ role_name: 'user' }] }))
+    setActivePinia(createPinia())
+    const wrapper = mountPage()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('New category')
+    expect(wrapper.findComponent(CategoryList).props('isAdmin')).toBe(false)
   })
 })

@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createVuetify } from 'vuetify'
+import { createPinia, setActivePinia } from 'pinia'
 import OrdersPage from './OrdersPage.vue'
 import OrderList from '../components/OrderList.vue'
 import OrderForm from '../components/OrderForm.vue'
@@ -43,6 +44,13 @@ describe('OrdersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     orderService.getAll.mockResolvedValue(orders)
+    localStorage.setItem('token', 'test-token')
+    localStorage.setItem('user', JSON.stringify({ id: 1, roles: [{ role_name: 'admin' }] }))
+    setActivePinia(createPinia())
+  })
+
+  afterEach(() => {
+    localStorage.clear()
   })
 
   it('loads orders on mount and passes them to OrderList', async () => {
@@ -133,5 +141,15 @@ describe('OrdersPage', () => {
 
     expect(orderService.remove).toHaveBeenCalledWith('1')
     expect(orderService.getAll).toHaveBeenCalledTimes(2)
+  })
+
+  it('hides the "New order" button for a non-admin', async () => {
+    localStorage.setItem('user', JSON.stringify({ id: 2, roles: [{ role_name: 'user' }] }))
+    setActivePinia(createPinia())
+    const wrapper = mountPage()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('New order')
+    expect(wrapper.findComponent(OrderList).props('isAdmin')).toBe(false)
   })
 })

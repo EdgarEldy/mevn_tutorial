@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/stores/auth.store'
 
-// Not yet wired into router/index.js - no protected routes exist until
-// feature/frontend/categories and friends land.
+// Wired in as beforeEnter on the categories/products/customers/orders route groups
+// (see router/index.js's protectedRoutes).
 export function authGuard(to, from, next) {
   const authStore = useAuthStore()
 

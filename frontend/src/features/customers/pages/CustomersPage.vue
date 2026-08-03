@@ -1,9 +1,13 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import customerService from '../services/customer.service'
 import CustomerList from '../components/CustomerList.vue'
 import CustomerForm from '../components/CustomerForm.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { useAuthStore } from '@/stores/auth.store'
+
+const { isAdmin } = storeToRefs(useAuthStore())
 
 const customers = ref([])
 const loading = ref(false)
@@ -71,11 +75,11 @@ onMounted(load)
     <v-card-title>Customers</v-card-title>
     <v-progress-linear v-if="loading" indeterminate />
     <v-card-text>
-      <div class="d-flex justify-end mb-2">
+      <div v-if="isAdmin" class="d-flex justify-end mb-2">
         <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">New customer</v-btn>
       </div>
 
-      <CustomerList :customers="customers" @edit="openEdit" @delete="confirmDelete" />
+      <CustomerList :customers="customers" :is-admin="isAdmin" @edit="openEdit" @delete="confirmDelete" />
     </v-card-text>
 
     <CustomerForm v-model="formOpen" :customer="editingCustomer" @submit="handleSubmit" />

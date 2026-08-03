@@ -836,23 +836,23 @@ not a substitute for one.
 
 ### Tasks
 
-- [ ] Add `stores/auth.store.js` (Pinia): real session state (`user`, `isAuthenticated`, `isAdmin`), persists `token`+`user` to `localStorage` (there is no `GET /auth/me` to re-fetch role data after a reload — the JWT payload itself carries no role info, only `{ id, email, jti }`; the only source of role data is the `roles` array in the login response body), and owns `logout()` (always clears the local session even if the backend call fails)
-- [ ] Rewire the router guard and axios interceptor placeholders to use the real store; the interceptor should also clear the session and redirect to `/login` on a 401
-- [ ] Add `features/auth/`: an `auth.service.js` (register/activate/login/forgotPassword/resetPassword against `/auth`), and five pages/views (login, register, activate, forgot-password, reset-password)
-- [ ] Since the backend emails the activation/reset link directly from `feature/api/auth`'s first commit (see the lesson below), these pages never receive a token to build a link from — `register`/`forgot-password` should show a plain "check your email" confirmation, nothing more
-- [ ] Add a shared password-match validator (VeeValidate custom rule or yup `.test()`), reused by the register and reset-password forms
-- [ ] Wire real login/logout state into `components/AppTopbar.vue`
-- [ ] Add the route guard to the categories/products/customers/orders routes
-- [ ] Retrofit `isAdmin`-gated UI into all four existing features' list and page components — or skip this entirely if the scope decision above chose real backend enforcement instead of UI-only gating; don't do both without saying so
-- [ ] Vitest unit tests for every new/changed file
-- [ ] Code review pass
+- [x] Add `stores/auth.store.js` (Pinia): real session state (`user`, `isAuthenticated`, `isAdmin`), persists `token`+`user` to `localStorage` (there is no `GET /auth/me` to re-fetch role data after a reload — the JWT payload itself carries no role info, only `{ id, email, jti }`; the only source of role data is the `roles` array in the login response body), and owns `logout()` (always clears the local session even if the backend call fails)
+- [x] Rewire the router guard and axios interceptor placeholders to use the real store; the interceptor should also clear the session and redirect to `/login` on a 401
+- [x] Add `features/auth/`: an `auth.service.js` (register/activate/login/forgotPassword/resetPassword against `/auth`), and five pages/views (login, register, activate, forgot-password, reset-password)
+- [x] Since the backend emails the activation/reset link directly from `feature/api/auth`'s first commit (see the lesson below), these pages never receive a token to build a link from — `register`/`forgot-password` should show a plain "check your email" confirmation, nothing more
+- [x] Add a shared password-match validator (VeeValidate custom rule or yup `.test()`), reused by the register and reset-password forms
+- [x] Wire real login/logout state into `components/AppTopbar.vue`
+- [x] Add the route guard to the categories/products/customers/orders routes
+- [x] Retrofit `isAdmin`-gated UI into all four existing features' list and page components — or skip this entirely if the scope decision above chose real backend enforcement instead of UI-only gating; don't do both without saying so
+- [x] Vitest unit tests for every new/changed file
+- [x] Code review pass
 
 ### Checklist
 
-- [ ] `npm run build` succeeds
-- [ ] `npm run test:unit` passes
-- [ ] The full backend flow (register → MailHog receives the activation email → activate → login → forgot-password → MailHog receives the reset email → reset-password → login with the new password) manually verified end-to-end against a live backend
-- [ ] Manual click-through of the Vue pages themselves (register/login/forgot/reset and the isAdmin-gated UI, if applicable) in an actual browser
+- [x] `npm run build` succeeds
+- [x] `npm run test:unit` passes
+- [x] The full backend flow (register → MailHog receives the activation email → activate → login → forgot-password → MailHog receives the reset email → reset-password → login with the new password) manually verified end-to-end against a live backend
+- [x] Manual click-through of the Vue pages themselves (register/login/forgot/reset and the isAdmin-gated UI, if applicable) in an actual browser — via Playwright/Chromium e2e tests driving the real pages against the real backend, not mocked
 
 ---
 
@@ -967,6 +967,29 @@ Concrete pitfalls to watch for, kept here so they aren't rediscovered the hard w
    field is meant to be fully optional. Any frontend form backed by an all-optional validation
    shape (see [feature/frontend/customers](#featurefrontendcustomers)) must strip blank fields
    out of the submit payload entirely rather than sending them as empty strings.
+
+10. **A JS module cycle can work by accident and still be a real cycle.** `router/index.js`
+    eagerly imports `DefaultLayout.vue` → `AppTopbar.vue` → `auth.service.js` → `api.service.js`
+    → `auth-interceptor.js`, which needs the router singleton to redirect on a 401 — closing the
+    cycle straight back to `router/index.js`. This ran fine, because nothing on that path touches
+    `router` until the response interceptor's callback actually fires, long after the whole
+    module graph has finished initializing — but it was one unlucky reordering away from a
+    `Cannot access 'router' before initialization` crash. A static `import router from '@/router'`
+    at the top of `auth-interceptor.js` looks harmless in isolation; the cycle only shows up by
+    tracing the *importer's* import graph too. Fixed with a dynamic `import()` inside the
+    callback instead, which sidesteps the cycle rather than relying on evaluation order. Treat
+    any file that both gets imported early (services, interceptors) and needs to reach back into
+    app-level singletons (the router, a store) as a cycle risk worth tracing by hand, not just
+    trusting that "it built without errors."
+
+11. **MailHog e2e helpers must filter by recipient, not just grab the latest message.**
+    A helper that does `GET /api/v2/messages?limit=1` and reads `items[0]` works fine in
+    isolation, but Playwright runs test files in parallel workers by default — once two tests
+    are registering accounts and sending mail through the same MailHog inbox close together,
+    "the latest message" stops reliably meaning "my message." Filter by the exact recipient
+    address instead (see [feature/frontend/auth](#featurefrontendauth)'s `e2e/helpers/auth.js`),
+    and fetch enough recent messages that a burst of parallel activity doesn't push the target
+    email out of the window.
 
 ---
 

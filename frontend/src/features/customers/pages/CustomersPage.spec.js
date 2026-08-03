@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createVuetify } from 'vuetify'
+import { createPinia, setActivePinia } from 'pinia'
 import CustomersPage from './CustomersPage.vue'
 import CustomerList from '../components/CustomerList.vue'
 import CustomerForm from '../components/CustomerForm.vue'
@@ -28,6 +29,13 @@ describe('CustomersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     customerService.getAll.mockResolvedValue(customers)
+    localStorage.setItem('token', 'test-token')
+    localStorage.setItem('user', JSON.stringify({ id: 1, roles: [{ role_name: 'admin' }] }))
+    setActivePinia(createPinia())
+  })
+
+  afterEach(() => {
+    localStorage.clear()
   })
 
   it('loads customers on mount and passes them to CustomerList', async () => {
@@ -118,5 +126,15 @@ describe('CustomersPage', () => {
 
     expect(customerService.remove).toHaveBeenCalledWith(1)
     expect(customerService.getAll).toHaveBeenCalledTimes(2)
+  })
+
+  it('hides the "New customer" button for a non-admin', async () => {
+    localStorage.setItem('user', JSON.stringify({ id: 2, roles: [{ role_name: 'user' }] }))
+    setActivePinia(createPinia())
+    const wrapper = mountPage()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('New customer')
+    expect(wrapper.findComponent(CustomerList).props('isAdmin')).toBe(false)
   })
 })

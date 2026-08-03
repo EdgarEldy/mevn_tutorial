@@ -1,13 +1,19 @@
 <script setup>
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.store'
+import authService from '@/features/auth/services/auth.service'
 
 defineEmits(['toggle-drawer'])
 
-// Placeholder until feature/frontend/auth: isAuthenticated always reads the
-// placeholder store, and there is no real logout action to wire up yet.
+const router = useRouter()
 const authStore = useAuthStore()
 const { isAuthenticated } = storeToRefs(authStore)
+
+async function logout() {
+  await authService.logout()
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -19,10 +25,8 @@ const { isAuthenticated } = storeToRefs(authStore)
         <v-btn icon="mdi-account-circle" aria-label="User menu" v-bind="menuProps" />
       </template>
       <v-list>
-        <!-- Neither entry navigates yet: /login doesn't exist until feature/frontend/auth
-             adds it, and there is no logout action to wire up until then either. -->
-        <v-list-item v-if="isAuthenticated" title="Logout" prepend-icon="mdi-logout" disabled />
-        <v-list-item v-else title="Login" prepend-icon="mdi-login" disabled />
+        <v-list-item v-if="isAuthenticated" title="Logout" prepend-icon="mdi-logout" @click="logout" />
+        <v-list-item v-else title="Login" prepend-icon="mdi-login" to="/login" />
       </v-list>
     </v-menu>
   </v-app-bar>

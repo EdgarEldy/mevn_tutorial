@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createVuetify } from 'vuetify'
+import { createPinia, setActivePinia } from 'pinia'
 import ProductsPage from './ProductsPage.vue'
 import ProductList from '../components/ProductList.vue'
 import ProductForm from '../components/ProductForm.vue'
@@ -32,6 +33,13 @@ describe('ProductsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     productService.getAll.mockResolvedValue(products)
+    localStorage.setItem('token', 'test-token')
+    localStorage.setItem('user', JSON.stringify({ id: 1, roles: [{ role_name: 'admin' }] }))
+    setActivePinia(createPinia())
+  })
+
+  afterEach(() => {
+    localStorage.clear()
   })
 
   it('loads products on mount and passes them to ProductList', async () => {
@@ -122,5 +130,15 @@ describe('ProductsPage', () => {
 
     expect(productService.remove).toHaveBeenCalledWith(1)
     expect(productService.getAll).toHaveBeenCalledTimes(2)
+  })
+
+  it('hides the "New product" button for a non-admin', async () => {
+    localStorage.setItem('user', JSON.stringify({ id: 2, roles: [{ role_name: 'user' }] }))
+    setActivePinia(createPinia())
+    const wrapper = mountPage()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('New product')
+    expect(wrapper.findComponent(ProductList).props('isAdmin')).toBe(false)
   })
 })
