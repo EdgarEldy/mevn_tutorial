@@ -36,7 +36,9 @@ test.describe('Auth', () => {
     await page.getByLabel('Password').fill('Password123')
     await page.getByRole('button', { name: 'Login' }).click()
 
-    await expect(page).toHaveURL(/\/$/)
+    // These navigations follow a real network round trip (login/logout), which can take
+    // longer than the default 5s assertion timeout on a slower or busier CI runner.
+    await expect(page).toHaveURL(/\/$/, { timeout: 10_000 })
 
     // Now that there's a real session, the previously-guarded route is reachable.
     await page.goto('/categories')
@@ -45,7 +47,7 @@ test.describe('Auth', () => {
     await page.getByRole('button', { name: 'User menu' }).click()
     await page.getByText('Logout').click()
 
-    await expect(page).toHaveURL(/\/login$/)
+    await expect(page).toHaveURL(/\/login$/, { timeout: 10_000 })
     await page.goto('/categories')
     await expect(page).toHaveURL(/\/login$/)
 
@@ -79,12 +81,15 @@ test.describe('Auth', () => {
     await page.getByLabel('Confirm new password').fill('NewPassword123')
     await page.getByRole('button', { name: 'Reset password' }).click()
 
-    await expect(page).toHaveURL(/\/login$/)
+    // These navigations follow a real network round trip (resetPassword/login), which
+    // can take longer than the default 5s assertion timeout on a slower or busier CI
+    // runner - this exact assertion is what flaked in CI (5s wasn't enough).
+    await expect(page).toHaveURL(/\/login$/, { timeout: 10_000 })
     await page.getByLabel('Email').fill(email)
     await page.getByLabel('Password').fill('NewPassword123')
     await page.getByRole('button', { name: 'Login' }).click()
 
-    await expect(page).toHaveURL(/\/$/)
+    await expect(page).toHaveURL(/\/$/, { timeout: 10_000 })
 
     await deleteUserByEmail(email)
   })
