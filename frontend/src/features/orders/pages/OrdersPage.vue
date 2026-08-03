@@ -1,9 +1,13 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import orderService from '../services/order.service'
 import OrderList from '../components/OrderList.vue'
 import OrderForm from '../components/OrderForm.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import { useAuthStore } from '@/stores/auth.store'
+
+const { isAdmin } = storeToRefs(useAuthStore())
 
 const orders = ref([])
 const loading = ref(false)
@@ -71,11 +75,11 @@ onMounted(load)
     <v-card-title>Orders</v-card-title>
     <v-progress-linear v-if="loading" indeterminate />
     <v-card-text>
-      <div class="d-flex justify-end mb-2">
+      <div v-if="isAdmin" class="d-flex justify-end mb-2">
         <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">New order</v-btn>
       </div>
 
-      <OrderList :orders="orders" @edit="openEdit" @delete="confirmDelete" />
+      <OrderList :orders="orders" :is-admin="isAdmin" @edit="openEdit" @delete="confirmDelete" />
     </v-card-text>
 
     <OrderForm v-model="formOpen" :order="editingOrder" @submit="handleSubmit" />
