@@ -19,9 +19,19 @@ describe('CategoryList', () => {
     expect(wrapper.text()).toContain('Electronics')
   })
 
+  it('hides the edit/delete actions when isAdmin is false', () => {
+    const wrapper = mount(CategoryList, {
+      props: { categories, isAdmin: false },
+      global: { plugins: [createVuetify()] },
+    })
+
+    expect(wrapper.find('button[aria-label="Edit"]').exists()).toBe(false)
+    expect(wrapper.find('button[aria-label="Delete"]').exists()).toBe(false)
+  })
+
   it('emits edit with the row when the edit action is clicked', async () => {
     const wrapper = mount(CategoryList, {
-      props: { categories },
+      props: { categories, isAdmin: true },
       global: { plugins: [createVuetify()] },
     })
 
@@ -32,7 +42,7 @@ describe('CategoryList', () => {
 
   it('emits delete with the row when the delete action is clicked', async () => {
     const wrapper = mount(CategoryList, {
-      props: { categories },
+      props: { categories, isAdmin: true },
       global: { plugins: [createVuetify()] },
     })
 
