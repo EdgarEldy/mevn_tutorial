@@ -30,9 +30,19 @@ describe('CustomerList', () => {
     expect(naCount).toBe(3)
   })
 
+  it('hides the edit/delete actions when isAdmin is false', () => {
+    const wrapper = mount(CustomerList, {
+      props: { customers, isAdmin: false },
+      global: { plugins: [createVuetify()] },
+    })
+
+    expect(wrapper.find('button[aria-label="Edit"]').exists()).toBe(false)
+    expect(wrapper.find('button[aria-label="Delete"]').exists()).toBe(false)
+  })
+
   it('emits edit with the row when the edit action is clicked', async () => {
     const wrapper = mount(CustomerList, {
-      props: { customers },
+      props: { customers, isAdmin: true },
       global: { plugins: [createVuetify()] },
     })
 
@@ -43,7 +53,7 @@ describe('CustomerList', () => {
 
   it('emits delete with the row when the delete action is clicked', async () => {
     const wrapper = mount(CustomerList, {
-      props: { customers },
+      props: { customers, isAdmin: true },
       global: { plugins: [createVuetify()] },
     })
 
